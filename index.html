@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>九宮格數字遊戲 (完美整合版)</title>
+<title>九宮格數字遊戲 (版面調整版)</title>
 <style>
   * {
     box-sizing: border-box;
   }
 
   body {
-    /* 與九宮格相同的預設字體 */
     font-family: "PingFang HK", "Microsoft JhengHei", sans-serif; 
     display: flex;
     flex-direction: column;
@@ -31,7 +30,7 @@
     margin-top: 10px;
   }
 
-  /* 最頂部的控制區域 */
+  /* 1. 最頂部的控制區域 */
   .top-controls {
     display: flex;
     align-items: center;
@@ -40,7 +39,7 @@
     font-size: 16px;
     color: #444;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     padding: 10px;
     background: #fff;
     border-radius: 10px;
@@ -57,21 +56,76 @@
     outline: none;
   }
 
-  /* 計時器區域設計 */
+  /* 2. 隨機數字組的設計 (現在在上方) */
+  .sequence-container {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 25px;
+  }
+
+  .sequence-label {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  .sequence-number {
+    font-size: clamp(28px, 7vw, 36px);
+    letter-spacing: clamp(4px, 2vw, 8px);
+    font-weight: bold;
+    color: #d9534f;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    word-wrap: break-word;
+  }
+
+  /* 3. 井字九宮格的設計 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2%;
+    background-color: #333;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 25px; /* 與下方計時器保持距離 */
+  }
+  
+  .cell {
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(32px, 8vw, 48px);
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    border-radius: 5px;
+    user-select: none;
+    transition: background-color 0.2s;
+  }
+  
+  .cell:active {
+    background-color: #e0e0e0;
+  }
+
+  /* 4. 計時器區域設計 (現在在下方) */
   .timer-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-bottom: 25px;
   }
 
   .time-display {
-    /* 與九宮格文字完全一樣的設定 */
     font-size: clamp(32px, 8vw, 48px); 
     font-weight: bold;
     color: #333;
-    /* 加入這行可讓數字寬度固定，計時跳動時才不會左右晃 */
     font-variant-numeric: tabular-nums; 
     margin-bottom: 15px;
   }
@@ -109,79 +163,22 @@
   }
 
   .btn-start {
-    background-color: #007aff; /* 藍色代表開始/新遊戲 */
+    background-color: #007aff; 
   }
   .btn-start:hover { background-color: #0056b3; }
 
   .btn-stop {
-    background-color: #dc3545; /* 紅色代表停止 */
+    background-color: #dc3545; 
   }
   .btn-stop:hover { background-color: #c82333; }
 
-  /* 井字九宮格的設計 */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 2%;
-    background-color: #333;
-    padding: 2%;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    width: 100%;
-    aspect-ratio: 1 / 1;
-  }
-  
-  .cell {
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* 與計時器完全一樣的設定 */
-    font-size: clamp(32px, 8vw, 48px);
-    font-weight: bold;
-    color: #333;
-    cursor: pointer;
-    border-radius: 5px;
-    user-select: none;
-    transition: background-color 0.2s;
-  }
-  
-  .cell:active {
-    background-color: #e0e0e0;
-  }
-
-  /* 下方隨機數字組的設計 */
-  .sequence-container {
-    margin-top: 25px;
-    text-align: center;
-    width: 100%;
-  }
-
-  .sequence-label {
-    font-size: 16px;
-    color: #666;
-    margin-bottom: 10px;
-  }
-
-  .sequence-number {
-    font-size: clamp(28px, 7vw, 36px);
-    letter-spacing: clamp(4px, 2vw, 8px);
-    font-weight: bold;
-    color: #d9534f;
-    background: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    word-wrap: break-word;
-  }
 </style>
 </head>
 <body>
 
 <div class="game-container">
   
-  <!-- 最頂部：目標長度選擇 -->
+  <!-- 1. 最頂部：目標長度選擇 -->
   <div class="top-controls">
     <label for="length-select">目標長度：</label>
     <select id="length-select" onchange="onLengthChange()">
@@ -191,26 +188,25 @@
     </select>
   </div>
 
-  <!-- 計時器與按鈕區域 -->
-  <div class="timer-container">
-    <div class="time-display" id="time-display">0.00</div>
-    <div class="timer-buttons">
-      <!-- 點擊開始時，會同時產生新遊戲並開始計時 -->
-      <button class="btn-timer btn-start" onclick="startGame()">開始</button>
-      <button class="btn-timer btn-stop" onclick="stopTimer()">停止</button>
-    </div>
-  </div>
-
-  <!-- 九宮格 -->
-  <div class="grid" id="grid">
-    <!-- 動態產生 -->
-  </div>
-
-  <!-- 隨機數字組 -->
+  <!-- 2. 隨機數字組 (已移到上方) -->
   <div class="sequence-container">
     <div class="sequence-label">請記住或點擊以下數字：</div>
     <div class="sequence-number" id="sequence">
       <!-- 動態產生 -->
+    </div>
+  </div>
+
+  <!-- 3. 九宮格 (維持在中間) -->
+  <div class="grid" id="grid">
+    <!-- 動態產生 -->
+  </div>
+
+  <!-- 4. 計時器與按鈕區域 (已移到下方) -->
+  <div class="timer-container">
+    <div class="time-display" id="time-display">0.00</div>
+    <div class="timer-buttons">
+      <button class="btn-timer btn-start" onclick="startGame()">開始</button>
+      <button class="btn-timer btn-stop" onclick="stopTimer()">停止</button>
     </div>
   </div>
 
@@ -239,7 +235,6 @@
   }
 
   // --- 遊戲邏輯 ---
-  // 打亂陣列 (洗牌)
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -248,7 +243,6 @@
     return array;
   }
 
-  // 僅更新畫面上的九宮格與數字
   function generateGameUI() {
     const gridElement = document.getElementById('grid');
     gridElement.innerHTML = ''; 
@@ -273,17 +267,12 @@
     sequenceElement.textContent = sequence;
   }
 
-  // 按下「開始」按鈕時觸發：換新題目 + 開始計時
   function startGame() {
-    // 1. 產生新題目
     generateGameUI();
-
-    // 2. 停止並重置當前的計時器
     stopTimer();
     elapsedTime = 0;
     updateDisplay(0);
 
-    // 3. 重新開始計時
     startTime = Date.now();
     isRunning = true;
     timerInterval = setInterval(() => {
@@ -292,7 +281,6 @@
     }, 10);
   }
 
-  // 當使用者手動切換長度時：換新題目，並把計時器歸零停止
   function onLengthChange() {
     stopTimer();
     elapsedTime = 0;
@@ -300,7 +288,6 @@
     generateGameUI();
   }
 
-  // 網頁載入時先初始化一次靜態畫面 (不計時)
   generateGameUI();
 </script>
 </body>
