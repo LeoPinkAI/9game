@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>九宮格數字遊戲 (版面調整版)</title>
+<title>九宮格數字遊戲 (不重複數字版)</title>
 <style>
   * {
     box-sizing: border-box;
@@ -56,7 +56,7 @@
     outline: none;
   }
 
-  /* 2. 隨機數字組的設計 (現在在上方) */
+  /* 2. 隨機數字組的設計 */
   .sequence-container {
     text-align: center;
     width: 100%;
@@ -93,7 +93,7 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     width: 100%;
     aspect-ratio: 1 / 1;
-    margin-bottom: 25px; /* 與下方計時器保持距離 */
+    margin-bottom: 25px; 
   }
   
   .cell {
@@ -114,7 +114,7 @@
     background-color: #e0e0e0;
   }
 
-  /* 4. 計時器區域設計 (現在在下方) */
+  /* 4. 計時器區域設計 */
   .timer-container {
     display: flex;
     flex-direction: column;
@@ -153,7 +153,7 @@
     transform: scale(0.95);
   }
 
-  /* 計時器按鈕 (加大版) */
+  /* 計時器按鈕 */
   .btn-timer {
     padding: 14px 24px;
     font-size: 18px;
@@ -188,7 +188,7 @@
     </select>
   </div>
 
-  <!-- 2. 隨機數字組 (已移到上方) -->
+  <!-- 2. 隨機數字組 -->
   <div class="sequence-container">
     <div class="sequence-label">請記住或點擊以下數字：</div>
     <div class="sequence-number" id="sequence">
@@ -196,12 +196,12 @@
     </div>
   </div>
 
-  <!-- 3. 九宮格 (維持在中間) -->
+  <!-- 3. 九宮格 -->
   <div class="grid" id="grid">
     <!-- 動態產生 -->
   </div>
 
-  <!-- 4. 計時器與按鈕區域 (已移到下方) -->
+  <!-- 4. 計時器與按鈕區域 -->
   <div class="timer-container">
     <div class="time-display" id="time-display">0.00</div>
     <div class="timer-buttons">
@@ -244,25 +244,34 @@
   }
 
   function generateGameUI() {
+    // 1. 產生 1-9 的隨機九宮格
     const gridElement = document.getElementById('grid');
     gridElement.innerHTML = ''; 
-    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    numbers = shuffle(numbers);
+    let gridNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    gridNumbers = shuffle(gridNumbers);
 
-    numbers.forEach(num => {
+    gridNumbers.forEach(num => {
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.textContent = num;
       gridElement.appendChild(cell);
     });
 
+    // 2. 取得目標長度
     const lengthSelect = document.getElementById('length-select');
     const length = parseInt(lengthSelect.value, 10); 
 
+    // 3. 產生不重複的隨機目標數字組
     const sequenceElement = document.getElementById('sequence');
+    
+    // 準備一個新的 1-9 陣列來洗牌，確保抽出來的數字不重複
+    let seqNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    seqNumbers = shuffle(seqNumbers);
+    
     let sequence = '';
+    // 取洗牌後陣列的前面幾個數字
     for (let i = 0; i < length; i++) {
-      sequence += Math.floor(Math.random() * 9) + 1; 
+      sequence += seqNumbers[i];
     }
     sequenceElement.textContent = sequence;
   }
