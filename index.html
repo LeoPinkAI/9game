@@ -2,9 +2,8 @@
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
-<!-- 加入 maximum-scale=1.0 和 user-scalable=no 防止手機點擊時意外放大畫面 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>九宮格數字遊戲 (自適應版)</title>
+<title>九宮格數字遊戲 (含計時器)</title>
 <style>
   * {
     box-sizing: border-box;
@@ -15,65 +14,36 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* 讓內容在電腦版也能置中 */
+    justify-content: flex-start; /* 改為從上方開始排列 */
     background-color: #f4f4f9;
     margin: 0;
     padding: 20px;
-    min-height: 100vh; /* 確保背景填滿整個螢幕高度 */
+    min-height: 100vh;
   }
   
-  /* 遊戲主容器，限制最大寬度，並在手機上自動撐滿 */
   .game-container {
     width: 100%;
-    max-width: 400px; /* 在電腦上最大不會超過 400px，手機上則是 100% 寬度 */
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-
-  /* 井字九宮格的設計 - 改用比例來設定 */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 均分三列 */
-    grid-template-rows: repeat(3, 1fr);    /* 均分三行 */
-    gap: 2%; /* 自動適應的間距 */
-    background-color: #333;
-    padding: 2%;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    width: 100%;
-    aspect-ratio: 1 / 1; /* 強制保持正方形 */
-  }
-  
-  .cell {
-    background-color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: clamp(32px, 8vw, 48px); /* 字體會隨螢幕大小自動縮放 (最小32px，最大48px) */
-    font-weight: bold;
-    color: #333;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s;
-    user-select: none; /* 防止連續點擊時選取到文字 */
-    touch-action: manipulation; /* 提升手機觸控反應速度 */
-  }
-  
-  .cell:active {
-    background-color: #e0e0e0;
-  }
-
-  /* 控制區域 (下拉式選單) */
-  .controls {
     margin-top: 20px;
+  }
+
+  /* 最頂部的控制區域 (下拉式選單) */
+  .top-controls {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     font-size: 16px;
     color: #444;
     width: 100%;
-    justify-content: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
 
   select {
@@ -86,9 +56,112 @@
     outline: none;
   }
 
+  /* 計時器區域設計 */
+  .timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .time-display {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    font-family: monospace; /* 讓數字寬度一致，跳動時才不會左右晃 */
+    margin-bottom: 10px;
+  }
+
+  .timer-buttons {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 通用按鈕樣式 */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    border-radius: 25px;
+    transition: transform 0.1s, background-color 0.2s;
+    touch-action: manipulation;
+    font-weight: bold;
+    color: white;
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }
+
+  /* 計時器小按鈕 */
+  .btn-timer {
+    padding: 10px 20px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    flex: 1;
+    max-width: 120px;
+  }
+
+  .btn-start {
+    background-color: #28a745; /* 綠色 */
+  }
+  .btn-start:hover { background-color: #218838; }
+
+  .btn-stop {
+    background-color: #dc3545; /* 紅色 */
+  }
+  .btn-stop:hover { background-color: #c82333; }
+
+  /* 產生新遊戲大按鈕 */
+  .btn-main {
+    margin-top: 30px;
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #007aff; /* 藍色 */
+    box-shadow: 0 4px 6px rgba(0,122,255,0.3);
+    width: 80%;
+    max-width: 300px;
+  }
+  .btn-main:hover { background-color: #0056b3; }
+
+  /* 井字九宮格的設計 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2%;
+    background-color: #333;
+    padding: 2%;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+  
+  .cell {
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(32px, 8vw, 48px);
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    border-radius: 5px;
+    user-select: none;
+    transition: background-color 0.2s;
+  }
+  
+  .cell:active {
+    background-color: #e0e0e0;
+  }
+
   /* 下方隨機數字組的設計 */
   .sequence-container {
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center;
     width: 100%;
   }
@@ -100,51 +173,24 @@
   }
 
   .sequence-number {
-    font-size: clamp(28px, 7vw, 36px); /* 數字大小自動適應 */
-    letter-spacing: clamp(4px, 2vw, 8px); /* 數字間距自動適應 */
+    font-size: clamp(28px, 7vw, 36px);
+    letter-spacing: clamp(4px, 2vw, 8px);
     font-weight: bold;
     color: #d9534f;
     background: #fff;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    word-wrap: break-word; /* 確保螢幕太小時數字不會超出邊界 */
-  }
-
-  /* 按鈕設計 */
-  button {
-    margin-top: 30px;
-    padding: 12px 24px;
-    font-size: 18px;
-    cursor: pointer;
-    background-color: #007aff;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    box-shadow: 0 4px 6px rgba(0,122,255,0.3);
-    transition: transform 0.1s, background-color 0.2s;
-    width: 80%;
-    max-width: 300px;
-    touch-action: manipulation;
-  }
-
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  button:active {
-    transform: scale(0.95);
+    word-wrap: break-word;
   }
 </style>
 </head>
 <body>
 
 <div class="game-container">
-  <div class="grid" id="grid">
-    <!-- 九宮格會在這裡動態產生 -->
-  </div>
-
-  <div class="controls">
+  
+  <!-- 1. 最頂部：目標長度選擇 -->
+  <div class="top-controls">
     <label for="length-select">目標長度：</label>
     <select id="length-select" onchange="generateGame()">
       <option value="4">4 位數</option>
@@ -153,17 +199,76 @@
     </select>
   </div>
 
-  <div class="sequence-container">
-    <div class="sequence-label">請記住或點擊以下數字序列：</div>
-    <div class="sequence-number" id="sequence">
-      <!-- 隨機數字組會在這裡產生 -->
+  <!-- 2. 計時器區域 -->
+  <div class="timer-container">
+    <div class="time-display" id="time-display">0.00</div>
+    <div class="timer-buttons">
+      <button class="btn-timer btn-start" onclick="startTimer()">開始</button>
+      <button class="btn-timer btn-stop" onclick="stopTimer()">停止</button>
     </div>
   </div>
 
-  <button onclick="generateGame()">產生新遊戲</button>
+  <!-- 3. 九宮格 -->
+  <div class="grid" id="grid">
+    <!-- 動態產生 -->
+  </div>
+
+  <!-- 4. 隨機數字組 -->
+  <div class="sequence-container">
+    <div class="sequence-label">請記住或點擊以下數字：</div>
+    <div class="sequence-number" id="sequence">
+      <!-- 動態產生 -->
+    </div>
+  </div>
+
+  <!-- 5. 重新開始按鈕 -->
+  <button class="btn-main" onclick="generateGame()">產生新遊戲</button>
+
 </div>
 
 <script>
+  // --- 計時器邏輯 ---
+  let timerInterval;
+  let startTime = 0;
+  let elapsedTime = 0;
+  let isRunning = false;
+
+  const timeDisplay = document.getElementById('time-display');
+
+  function updateDisplay(time) {
+    // 計算秒數與毫秒
+    let seconds = Math.floor(time / 1000);
+    let milliseconds = Math.floor((time % 1000) / 10); // 取兩位小數
+    
+    // 補零格式化
+    let msString = milliseconds < 10 ? "0" + milliseconds : milliseconds;
+    timeDisplay.textContent = `${seconds}.${msString}`;
+  }
+
+  function startTimer() {
+    if (isRunning) return; // 如果已經在跑了就不理會
+    isRunning = true;
+    startTime = Date.now() - elapsedTime; // 確保暫停後能繼續接續時間
+    
+    timerInterval = setInterval(() => {
+      elapsedTime = Date.now() - startTime;
+      updateDisplay(elapsedTime);
+    }, 10); // 每 10 毫秒更新一次
+  }
+
+  function stopTimer() {
+    if (!isRunning) return;
+    isRunning = false;
+    clearInterval(timerInterval);
+  }
+
+  function resetTimer() {
+    stopTimer();
+    elapsedTime = 0;
+    updateDisplay(elapsedTime);
+  }
+
+  // --- 遊戲生成邏輯 ---
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -173,6 +278,10 @@
   }
 
   function generateGame() {
+    // 每次產生新遊戲時，自動重置計時器
+    resetTimer();
+
+    // 1. 產生 1-9 的隨機九宮格
     const gridElement = document.getElementById('grid');
     gridElement.innerHTML = ''; 
     let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -185,18 +294,20 @@
       gridElement.appendChild(cell);
     });
 
+    // 2. 根據下拉選單設定長度
     const lengthSelect = document.getElementById('length-select');
     const length = parseInt(lengthSelect.value, 10); 
 
+    // 3. 產生指定位數的隨機數字組
     const sequenceElement = document.getElementById('sequence');
     let sequence = '';
-    
     for (let i = 0; i < length; i++) {
       sequence += Math.floor(Math.random() * 9) + 1; 
     }
     sequenceElement.textContent = sequence;
   }
 
+  // 網頁載入時初始化
   generateGame();
 </script>
 </body>
