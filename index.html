@@ -2,28 +2,47 @@
 <html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>九宮格數字遊戲 (自訂長度)</title>
+<!-- 加入 maximum-scale=1.0 和 user-scalable=no 防止手機點擊時意外放大畫面 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>九宮格數字遊戲 (自適應版)</title>
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: "PingFang HK", "Microsoft JhengHei", sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* 讓內容在電腦版也能置中 */
     background-color: #f4f4f9;
-    margin-top: 50px;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh; /* 確保背景填滿整個螢幕高度 */
   }
   
-  /* 井字九宮格的設計 */
+  /* 遊戲主容器，限制最大寬度，並在手機上自動撐滿 */
+  .game-container {
+    width: 100%;
+    max-width: 400px; /* 在電腦上最大不會超過 400px，手機上則是 100% 寬度 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 井字九宮格的設計 - 改用比例來設定 */
   .grid {
     display: grid;
-    grid-template-columns: repeat(3, 80px);
-    grid-template-rows: repeat(3, 80px);
-    gap: 5px;
+    grid-template-columns: repeat(3, 1fr); /* 均分三列 */
+    grid-template-rows: repeat(3, 1fr);    /* 均分三行 */
+    gap: 2%; /* 自動適應的間距 */
     background-color: #333;
-    padding: 5px;
+    padding: 2%;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    width: 100%;
+    aspect-ratio: 1 / 1; /* 強制保持正方形 */
   }
   
   .cell {
@@ -31,12 +50,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 36px;
+    font-size: clamp(32px, 8vw, 48px); /* 字體會隨螢幕大小自動縮放 (最小32px，最大48px) */
     font-weight: bold;
     color: #333;
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.2s;
+    user-select: none; /* 防止連續點擊時選取到文字 */
+    touch-action: manipulation; /* 提升手機觸控反應速度 */
   }
   
   .cell:active {
@@ -45,12 +66,14 @@
 
   /* 控制區域 (下拉式選單) */
   .controls {
-    margin-top: 30px;
+    margin-top: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
     font-size: 16px;
     color: #444;
+    width: 100%;
+    justify-content: center;
   }
 
   select {
@@ -67,6 +90,7 @@
   .sequence-container {
     margin-top: 20px;
     text-align: center;
+    width: 100%;
   }
 
   .sequence-label {
@@ -76,14 +100,15 @@
   }
 
   .sequence-number {
-    font-size: 32px;
-    letter-spacing: 8px;
+    font-size: clamp(28px, 7vw, 36px); /* 數字大小自動適應 */
+    letter-spacing: clamp(4px, 2vw, 8px); /* 數字間距自動適應 */
     font-weight: bold;
     color: #d9534f;
     background: #fff;
-    padding: 10px 20px;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    word-wrap: break-word; /* 確保螢幕太小時數字不會超出邊界 */
   }
 
   /* 按鈕設計 */
@@ -98,6 +123,9 @@
     border-radius: 25px;
     box-shadow: 0 4px 6px rgba(0,122,255,0.3);
     transition: transform 0.1s, background-color 0.2s;
+    width: 80%;
+    max-width: 300px;
+    touch-action: manipulation;
   }
 
   button:hover {
@@ -111,28 +139,29 @@
 </head>
 <body>
 
-<div class="grid" id="grid">
-  <!-- 九宮格會在這裡動態產生 -->
-</div>
-
-<!-- 新增的設定區域 -->
-<div class="controls">
-  <label for="length-select">選擇目標數字長度：</label>
-  <select id="length-select" onchange="generateGame()">
-    <option value="4">4 位數</option>
-    <option value="5">5 位數</option>
-    <option value="6">6 位數</option>
-  </select>
-</div>
-
-<div class="sequence-container">
-  <div class="sequence-label">請記住或點擊以下數字序列：</div>
-  <div class="sequence-number" id="sequence">
-    <!-- 隨機數字組會在這裡產生 -->
+<div class="game-container">
+  <div class="grid" id="grid">
+    <!-- 九宮格會在這裡動態產生 -->
   </div>
-</div>
 
-<button onclick="generateGame()">產生新遊戲</button>
+  <div class="controls">
+    <label for="length-select">目標長度：</label>
+    <select id="length-select" onchange="generateGame()">
+      <option value="4">4 位數</option>
+      <option value="5">5 位數</option>
+      <option value="6">6 位數</option>
+    </select>
+  </div>
+
+  <div class="sequence-container">
+    <div class="sequence-label">請記住或點擊以下數字序列：</div>
+    <div class="sequence-number" id="sequence">
+      <!-- 隨機數字組會在這裡產生 -->
+    </div>
+  </div>
+
+  <button onclick="generateGame()">產生新遊戲</button>
+</div>
 
 <script>
   function shuffle(array) {
@@ -144,7 +173,6 @@
   }
 
   function generateGame() {
-    // 1. 產生 1-9 的隨機九宮格
     const gridElement = document.getElementById('grid');
     gridElement.innerHTML = ''; 
     let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -157,11 +185,9 @@
       gridElement.appendChild(cell);
     });
 
-    // 2. 根據下拉式選單取得手動設定的長度
     const lengthSelect = document.getElementById('length-select');
-    const length = parseInt(lengthSelect.value, 10); // 取得 4, 5, 或 6
+    const length = parseInt(lengthSelect.value, 10); 
 
-    // 3. 產生指定位數的隨機數字組
     const sequenceElement = document.getElementById('sequence');
     let sequence = '';
     
@@ -171,7 +197,6 @@
     sequenceElement.textContent = sequence;
   }
 
-  // 網頁載入時立刻初始化
   generateGame();
 </script>
 </body>
